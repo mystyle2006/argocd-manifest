@@ -5,7 +5,7 @@ kind: Kustomization
 images:
 - name: overlay-image
   newName: 580214777026.dkr.ecr.ap-southeast-1.amazonaws.com/kr-partner-app-dev
-  newTag: example
+  newTag: example2
 
 helmGlobals:
   chartHome: ../../helm

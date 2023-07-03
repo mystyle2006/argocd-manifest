@@ -1,0 +1,88 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/healthcheck-path: /?alb
+  name: inho-api
+  namespace: default
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: inho-api
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inho-api
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: inho-api
+  template:
+    metadata:
+      labels:
+        app: inho-api
+        tier: backend
+    spec:
+      containers:
+      - image: 580214777026.dkr.ecr.ap-southeast-1.amazonaws.com/kr-partner-app-dev:example
+        imagePullPolicy: Always
+        name: inho-api
+        ports:
+        - containerPort: 3000
+          name: http
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /?readiness
+            port: 3000
+            scheme: HTTP
+          initialDelaySeconds: 90
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 10
+        resources:
+          limits:
+            cpu: 1500m
+            memory: 1500Mi
+          requests:
+            cpu: 50m
+            memory: 300Mi
+      terminationGracePeriodSeconds: 30
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  annotations:
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-southeast-1:580214777026:certificate/1cbc089a-7e80-4bb4-b3ad-d0f00d0c4c90
+    alb.ingress.kubernetes.io/group.name: inho
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS":443}]'
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-2016-08
+    alb.ingress.kubernetes.io/ssl-redirect: "443"
+    alb.ingress.kubernetes.io/target-type: ip
+  labels:
+    app: inho-api
+    tier: backend
+  name: inho-api-ingress
+  namespace: default
+spec:
+  ingressClassName: alb
+  rules:
+  - host: api.dev.inho.gomicorp.click
+    http:
+      paths:
+      - backend:
+          service:
+            name: inho-api
+            port:
+              number: 80
+        path: /
+        pathType: Prefix
