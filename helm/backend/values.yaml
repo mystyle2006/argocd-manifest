@@ -1,0 +1,35 @@
+# metadata, label 명
+name: inho-api
+# namespace
+namespace: default
+# tier: frontend/backend
+tier: backend
+# replica 수
+replicas: 2
+# 컨테이너 포트
+containerPort: 3000
+# acm arn
+acmArn: arn:aws:acm:ap-southeast-1:580214777026:certificate/1cbc089a-7e80-4bb4-b3ad-d0f00d0c4c90
+
+# 서비스 포트, 타입
+service:
+  port: 80
+  type: NodePort
+
+# resource(cpu, memory) request, limit 설정
+resources:
+  requests:
+    cpu: 50m
+    memory: 300Mi
+  limits:
+    cpu: 1500m
+    memory: 1500Mi
+
+# probe initial delay 타임
+readinessProbe:
+  initialDelaySeconds: 90
+
+# ingress
+ingress:
+    hostMainDomain: "inho.gomicorp.click"
+    hostPrefix: "apps.dev."
